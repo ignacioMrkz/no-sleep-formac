@@ -1,0 +1,123 @@
+#!/bin/bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+LIB="${NSF_INSTALL_LIB:-${REPO_ROOT}/lib}"
+# shellcheck source=../lib/common.sh
+source "${LIB}/common.sh"
+
+usage() {
+  cat <<EOF
+no-sleep-formac — keep Mac awake (lid closed) for Cursor Remote Control
+
+Usage:
+  no-sleep-formac install
+  no-sleep-formac preflight
+  no-sleep-formac away [--mode eco|full]
+  no-sleep-formac enable [--mode eco|full]
+  no-sleep-formac disable          # only manual — e.g. from Cursor mobile
+  no-sleep-formac status [--json]
+  no-sleep-formac self-test
+  no-sleep-formac version
+
+Disable from iPhone (Cursor): "desactiva headless" / "modo normal"
+EOF
+}
+
+cmd_install() {
+  bash "${REPO_ROOT}/install.sh"
+}
+
+cmd_preflight() {
+  bash "${LIB}/preflight.sh"
+}
+
+cmd_enable() {
+  local mode="eco"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --mode) mode="$2"; shift 2 ;;
+      *) echo "Unknown: $1"; exit 1 ;;
+    esac
+  done
+  [[ "${mode}" == "eco" || "${mode}" == "full" ]] || { echo "mode must be eco or full"; exit 1; }
+  write_flag_on "${mode}"
+  bash "${LIB}/headless-manager.sh"
+  echo "Headless ON (mode=${mode}). Close lid when ready."
+}
+
+cmd_away() {
+  cmd_preflight || exit 1
+  cmd_enable "$@"
+}
+
+cmd_disable() {
+  write_flag_off
+  bash "${LIB}/headless-manager.sh"
+  echo "Headless OFF. Mac can sleep normally."
+}
+
+cmd_status() {
+  local json=false
+  [[ "${1:-}" == "--json" ]] && json=true
+
+  local flag="off" mode="" active="false"
+  is_flag_on && flag="on" && mode="$(read_mode)"
+  [[ -f "${NSF_STATE}" ]] && active="$(python3 -c "import json; print(json.load(open('${NSF_STATE}')).get('active', False))" 2>/dev/null || echo false)"
+
+  local ac="false"
+  on_ac_power && ac="true"
+
+  if ${json}; then
+    python3 - <<PY
+import json
+print(json.dumps({
+  "flag": "${flag}",
+  "mode": "${mode}",
+  "active": ${active},
+  "ac_power": ${ac},
+  "version": "${NSF_VERSION}",
+}, indent=2))
+PY
+  else
+    echo "no-sleep-formac ${NSF_VERSION}"
+    echo "Flag:     ${flag}"
+    echo "Active:   ${active}"
+    echo "Mode:     ${mode:-—}"
+    echo "AC power: ${ac}"
+    echo ""
+    bash "${LIB}/health.sh" | sed 's/^/  /'
+  fi
+}
+
+cmd_self_test() {
+  echo "Self-test: enable eco 120s then disable..."
+  write_flag_on eco
+  bash "${LIB}/headless-manager.sh"
+  sleep 2
+  pmset -g custom | grep -A5 "AC Power" || true
+  echo "Waiting 10s (lid may stay open for test)..."
+  sleep 10
+  write_flag_off
+  bash "${LIB}/headless-manager.sh"
+  echo "Self-test done. Check pmset restored."
+}
+
+main() {
+  local cmd="${1:-}"
+  shift || true
+  case "${cmd}" in
+    install) cmd_install ;;
+    preflight) cmd_preflight ;;
+    away) cmd_away "$@" ;;
+    enable) cmd_enable "$@" ;;
+    disable) cmd_disable ;;
+    status) cmd_status "$@" ;;
+    self-test) cmd_self_test ;;
+    version) echo "no-sleep-formac ${NSF_VERSION}" ;;
+    ""|-h|--help|help) usage ;;
+    *) echo "Unknown command: ${cmd}"; usage; exit 1 ;;
+  esac
+}
+
+main "$@"
