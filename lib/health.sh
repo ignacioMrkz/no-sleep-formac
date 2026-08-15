@@ -34,12 +34,6 @@ else
   issues+=("Cursor not running")
 fi
 
-if [[ -f "${HOME}/.google-workspace-mcp/token.json" ]]; then
-  ok+=("Google MCP token present")
-else
-  issues+=("Google MCP token missing")
-fi
-
 if ping -c 1 -t 2 1.1.1.1 >/dev/null 2>&1; then
   ok+=("Internet reachable")
 else

@@ -1,2 +1,10 @@
 .DS_Store
 *.log
+*.swp
+*~
+
+# Local runtime state (never commit)
+.enabled.json
+state.json
+pmset-backup*.txt
+caffeinate.pid

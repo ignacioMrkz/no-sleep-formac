@@ -20,7 +20,8 @@ Usage:
   no-sleep-formac self-test
   no-sleep-formac version
 
-Disable from iPhone (Cursor): "desactiva headless" / "modo normal"
+Tip: from Cursor Remote on your phone you can ask the agent to run:
+  no-sleep-formac disable
 EOF
 }
 
