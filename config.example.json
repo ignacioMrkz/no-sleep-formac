@@ -1,0 +1,20 @@
+{
+  "relaunch": true,
+  "relaunch_cooldown_seconds": 600,
+  "agents": [
+    {
+      "id": "cursor",
+      "label": "Cursor",
+      "match": ["Cursor"],
+      "open": "Cursor",
+      "relaunch": true
+    },
+    {
+      "id": "codex",
+      "label": "Codex (ChatGPT app)",
+      "match": ["ChatGPT", "Codex"],
+      "open": "ChatGPT",
+      "relaunch": true
+    }
+  ]
+}

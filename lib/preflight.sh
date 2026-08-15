@@ -14,8 +14,9 @@ while IFS= read -r line; do
   [[ "${line}" == ISSUE:* ]] && echo "WARN: ${line#ISSUE:}"
 done < <("${SCRIPT_DIR}/health.sh")
 
-if ! pgrep -x "Cursor" >/dev/null 2>&1 && ! pgrep -f "/Applications/Cursor.app" >/dev/null 2>&1; then
-  echo "WARN: Cursor not running. Open Cursor + /remote-control before closing lid."
+if ! any_agent_running; then
+  echo "WARN: No configured agent is running (Cursor / Codex / custom in config.json)."
+  echo "      Start your agent app or CLI before closing the lid."
 fi
 
 [[ ${fail} -eq 0 ]] && echo "OK: preflight passed"

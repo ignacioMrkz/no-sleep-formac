@@ -8,19 +8,20 @@ source "${LIB}/common.sh"
 
 usage() {
   cat <<EOF
-no-sleep-formac — keep Mac awake (lid closed) for Cursor Remote Control
+no-sleep-formac — keep Mac awake with the lid closed (Codex, Cursor, SSH, …)
 
 Usage:
   no-sleep-formac install
   no-sleep-formac preflight
   no-sleep-formac away [--mode eco|full]
   no-sleep-formac enable [--mode eco|full]
-  no-sleep-formac disable          # only manual — e.g. from Cursor mobile
+  no-sleep-formac disable          # restore normal sleep (manual only)
   no-sleep-formac status [--json]
   no-sleep-formac self-test
   no-sleep-formac version
 
-Tip: from Cursor Remote on your phone you can ask the agent to run:
+Agents are configured in ~/.config/no-sleep-formac/config.json
+(see config.example.json). Tip: ask your remote agent to run:
   no-sleep-formac disable
 EOF
 }

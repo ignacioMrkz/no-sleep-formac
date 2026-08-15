@@ -28,10 +28,14 @@ else
   issues+=("No network on en0")
 fi
 
-if pgrep -x "Cursor" >/dev/null 2>&1 || pgrep -f "/Applications/Cursor.app" >/dev/null 2>&1; then
-  ok+=("Cursor running")
+running_agents="$(list_running_agents 2>/dev/null || true)"
+if [[ -n "${running_agents}" ]]; then
+  while IFS= read -r agent; do
+    [[ -z "${agent}" ]] && continue
+    ok+=("Agent: ${agent}")
+  done <<< "${running_agents}"
 else
-  issues+=("Cursor not running")
+  issues+=("No configured agent running (see config.json)")
 fi
 
 if ping -c 1 -t 2 1.1.1.1 >/dev/null 2>&1; then

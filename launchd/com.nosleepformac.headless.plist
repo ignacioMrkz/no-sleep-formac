@@ -4,7 +4,7 @@
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.ruralhackers.no-sleep-formac</string>
+  <string>com.nosleepformac.headless</string>
 
   <key>ProgramArguments</key>
   <array>
